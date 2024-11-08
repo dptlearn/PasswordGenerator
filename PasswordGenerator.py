@@ -1,5 +1,6 @@
 import random as rand
 import string
+import os
 
 class UserInput:
     def __init__(self):
@@ -39,6 +40,14 @@ class UserInput:
         file_name = input("Name of file: ")
         return file_name
         
+    def getDrive(self):
+        drive_name = input("Enter which drive should the passwords be saved in: ")
+        return drive_name
+        
+    def getFolder(self):
+        folder_directory = input("Enter which folder should the passwords be saved in (e.g. MyFolder\Password): ")
+        return folder_directory
+        
 class GeneratePasswords:
     def __init__(self):
         self.password_dict = {}
@@ -51,7 +60,7 @@ class GeneratePasswords:
             
                 
             password = password.join(rand.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=length_of_password))
-            self.password_dict[i] = password
+            self.password_dict[i] = password 
         
         return self.password_dict
         
@@ -59,13 +68,20 @@ class SaveToFile:
     def __init__(self):
         pass
     
-    def saveFile(self, file_name, password_dict):
-        for i in range(0, len(password_dict)):
-            with open(file_name, 'a') as file:
-                password = password_dict[i+1] + "\n"
-                file.write(password)
+    def saveFile(self, file_name, password_dict, name_of_drive, name_of_folder):
+        directory = name_of_drive + ':' + '\\' + name_of_folder
         
-        print(f"Passwords saved to {file_name}")
+        #Ensure the directory exists
+        os.makedirs(directory, exist_ok=True)
+        
+        #Final file name with directory
+        final_file_name = os.path.join(directory, file_name)
+        for i in range(0, len(password_dict)):
+            with open(final_file_name, 'a') as file:
+                password = password_dict[i+1] 
+                file.write(password + "\n")
+        
+        print(f"Passwords saved to {final_file_name}")
             
 class Main:
     def __init__(self):
@@ -82,8 +98,10 @@ class Main:
         save_file = user_input.getSaveFileRequest()
         name_of_file = ""
         if(save_file == True):
+            name_of_drive = user_input.getDrive()
+            name_of_folder = user_input.getFolder()
             name_of_file = user_input.getFileName() + ".txt"
-            save_file_class.saveFile(name_of_file, dictionary)
+            save_file_class.saveFile(name_of_file, dictionary, name_of_drive, name_of_folder)
     
 if __name__ == "__main__":
     Main()
